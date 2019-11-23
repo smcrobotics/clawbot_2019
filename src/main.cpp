@@ -73,56 +73,65 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-#define LEFT_WHEELS_PORT 1
-#define RIGHT_WHEELS_PORT 2
-#define ARM_PORT 8
-#define CLAW_PORT 3
+#define BACK_LEFT_WHEELS_PORT 2
+#define FRONT_LEFT_WHEELS_PORT 1
+#define BACK_RIGHT_WHEELS_PORT 12
+#define FRONT_RIGHT_WHEELS_PORT 11
+#define INTAKE_LEFT 10
+#define INTAKE_RIGHT 20
 
 void opcontrol() {
-  pros::Motor left_wheels (LEFT_WHEELS_PORT);
-  pros::Motor right_wheels (RIGHT_WHEELS_PORT, true);
-  pros::Motor arm (ARM_PORT, MOTOR_GEARSET_36); // The arm motor has the 100rpm (red) gearset
-  pros::Motor claw (CLAW_PORT, MOTOR_GEARSET_36);
+  pros::Motor back_left_wheels (BACK_LEFT_WHEELS_PORT);
+  // pros::Motor front_left_wheels (FRONT_LEFT_WHEELS_PORT);
+  pros::Motor back_right_wheels (BACK_RIGHT_WHEELS_PORT, true);
+  // pros::Motor front_right_wheels (FRONT_RIGHT_WHEELS_PORT, true);
+  // pros::Motor arm (ARM_PORT, MOTOR_GEARSET_36); // The arm motor has the 100rpm (red) gearset
+  // pros::Motor claw (CLAW_PORT, MOTOR_GEARSET_36);
+  pros::Motor intake_left (INTAKE_LEFT);
+  pros::Motor intake_right (INTAKE_RIGHT, true); // invert
   pros::Controller master (CONTROLLER_MASTER);
 
-  arm.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
-
+  // arm.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  // claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
   while (true) {
     /**
      * This will do tank drive
      */
-    // left_wheels.move(master.get_analog(ANALOG_LEFT_Y));
-    // right_wheels.move(master.get_analog(ANALOG_RIGHT_Y));
+    back_left_wheels.move(master.get_analog(ANALOG_LEFT_Y));
+    // front_left_wheels.move(master.get_analog(ANALOG_LEFT_Y));
+    back_right_wheels.move(master.get_analog(ANALOG_RIGHT_Y));
+    // front_right_wheels.move(master.get_analog(ANALOG_RIGHT_Y));
 
-    int power = master.get_analog(ANALOG_RIGHT_Y);
-    int turn = master.get_analog(ANALOG_LEFT_X);
-    int left = power + turn;
-    int right = power - turn;
-    left_wheels.move(left);
-    right_wheels.move(right);
+    // int power = master.get_analog(ANALOG_RIGHT_Y);
+    // int turn = master.get_analog(ANALOG_LEFT_X);
+    // int left = power + turn;
+    // int right = power - turn;
+    // left_wheels.move(left);
+    // right_wheels.move(right);
 
     if (master.get_digital(DIGITAL_R1)) {
-      arm.move_velocity(10); // This is 100 because it's a 100rpm motor
+      intake_left.move_velocity(100); // This is 100 because it's a 100rpm motor
+      intake_right.move_velocity(100);
     }
     else if (master.get_digital(DIGITAL_R2)) {
-      arm.move_velocity(-100);
+      intake_left.move_velocity(-100); // This is 100 because it's a 100rpm motor
+      intake_right.move_velocity(-100);
     }
     else {
-      arm.move_velocity(0);
+      intake_left.move_velocity(0); // This is 100 because it's a 100rpm motor
+      intake_right.move_velocity(0);
     }
 
-    if (master.get_digital(DIGITAL_L1)) {
-      claw.move_velocity(100);
-    }
-    else if (master.get_digital(DIGITAL_L2)) {
-      claw.move_velocity(-100);
-    }
-    else {
-      claw.move_velocity(0);
-    }
+    // if (master.get_digital(DIGITAL_L1)) {
+    //   claw.move_velocity(100);
+    // }
+    // else if (master.get_digital(DIGITAL_L2)) {
+    //   claw.move_velocity(-100);
+    // }
+    // else {
+    //   claw.move_velocity(0);
+    // }
 
     pros::delay(2);
   }
